@@ -1,0 +1,37 @@
+{% extends 'layout_page.twig' %}
+
+{% set page = 'status' %}
+
+{% block title %}GitList{% endblock %}
+
+{% block content %}
+    {% include 'breadcrumb.twig' with {breadcrumbs: [{dir: 'Status', path:''}]} %}
+
+        {% if files is not empty %}
+        <table class="tree">
+            <thead>
+            <tr>
+                <th width="5%">status</th>
+                <th width="80%">filename</th>
+                <th width="15%">modified</th>
+                
+            </tr>
+            </thead>
+            
+            {% for file in files %}
+            <tr>
+                <td>{{ file.status }}</td>
+                <!--<td>{{ file.filename }}</td>-->
+                <td><i class="{{ file.type == "folder" or file.type == "symlink" ? "icon-folder-open" : "icon-file" }} icon-spaced"></i> <a href="
+                {{ path('blob', {repo: repo, commitishPath: branch ~ '/' ~ file.filename}) }}
+                ">{{ file.filename }}</a></td>
+                </td>
+                <td>{{ file.modification }}</td>
+            </tr>
+            {% endfor %}
+            
+        </table>
+        {% endif %}
+
+    <hr />
+{% endblock %}

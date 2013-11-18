@@ -294,6 +294,44 @@ class Repository extends BaseRepository
 
         return $searchResults;
     }
+    
+    /*
+        Possible status letters are:
+        A: addition of a file
+        C: copy of a file into a new one
+        D: deletion of a file
+        M: modification of the contents or mode of a file
+        R: renaming of a file
+        T: change in the type of the file
+        U: file is unmerged (you must complete the merge before it can be committed)
+        X: "unknown" change type (most probably a bug, please report it)
+     */
+    public function getStatus($branch)
+    {
+        $files = array();
+        $status = trim($this->getClient()->run($this, 'status --porcelain'));
+        foreach(explode("\n",$status) as $l)
+        {
+            if(empty($l))
+            {
+                continue;
+            }
+            
+            preg_match(":^\s*([ACDMRTUX]+)\s+(.+)$:", $l, $m);
+            
+            $status_letter = $m[1];
+            $file = $m[2];
+            
+            $files[] = array(
+                'filename' => $file,
+                'status' => $status_letter,
+                'modification' => date("M j G:i:s",filemtime($_SERVER['DOCUMENT_ROOT'].'/'.$file)),
+                'type' => 'file',
+                'path' => '',
+            );
+        }
+        return $files;
+    }
 
     public function getAuthorStatistics($branch)
     {
