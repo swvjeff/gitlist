@@ -317,7 +317,7 @@ class Repository extends BaseRepository
                 continue;
             }
             
-            preg_match(":^\s*([ACDMRTUX]+)\s+(.+)$:", $l, $m);
+            preg_match(":^\s*([ACDMRTUX]+|\?\?)\s+(.+)$:", $l, $m);
             
             $status_letter = $m[1];
             $file = $m[2];
