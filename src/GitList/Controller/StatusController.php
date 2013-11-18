@@ -15,7 +15,7 @@ class StatusController implements ControllerProviderInterface
         
         $route->get('{repo}/status/{branch}', function($repo, $branch) use ($app) {
             $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
-
+            
             if ($branch === null) {
                 $branch = $repository->getHead();
             }

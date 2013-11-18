@@ -319,11 +319,12 @@ class Repository extends BaseRepository
             
             preg_match(":^(.)(.) (.+)$:", $s, $m);
             $filename = $m[3];
-            $full_path = $_SERVER['DOCUMENT_ROOT'] . '/' . $filename;
+            $full_path = $this->getPath() . '/' . $filename;
+            
             
             $staged = !in_array($m[1], array(" ","?"));
             $unstaged = $m[2] !== ' ';
-            
+
             $file_info = array(
                 'filename' => $filename,
                 'status' => $m[2],
