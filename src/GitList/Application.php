@@ -41,7 +41,7 @@ class Application extends SilexApplication
         ));
 
         $repositories = $config->get('git', 'repositories');
-
+        $recurse = $config->get('git', 'recurse');
         $this->register(new GitServiceProvider(), array(
             'git.client'         => $config->get('git', 'client'),
             'git.repos'          => $repositories,
@@ -50,6 +50,8 @@ class Application extends SilexApplication
                                     $config->get('git', 'hidden') : array(),
             'git.default_branch' => $config->get('git', 'default_branch') ?
                                     $config->get('git', 'default_branch') : 'master',
+            // FALSE means the config wasn't set, and we want backwards compatibility
+            'git.recurse'        => ($recurse === FALSE || $recurse === "1") ? TRUE : FALSE,
         ));
 
         $this->register(new ViewUtilServiceProvider());

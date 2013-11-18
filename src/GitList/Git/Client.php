@@ -8,12 +8,14 @@ class Client extends BaseClient
 {
     protected $defaultBranch;
     protected $hidden;
+    protected $recurse;
 
     public function __construct($options = null)
     {
         parent::__construct($options['path']);
         $this->setDefaultBranch($options['default_branch']);
         $this->setHidden($options['hidden']);
+        $this->setRecurse($options['recurse']);
     }
 
     public function getRepositoryFromName($paths, $repo)
@@ -103,7 +105,7 @@ class Client extends BaseClient
                     );
 
                     continue;
-                } else {
+                } elseif($this->getRecurse() === TRUE) {
                     $repositories = array_merge($repositories, $this->recurseDirectory($file->getPathname(), false));
                 }
             }
@@ -151,6 +153,28 @@ class Client extends BaseClient
     {
         $this->hidden = $hidden;
 
+        return $this;
+    }
+
+    /**
+     * Set the recurse flag
+     *
+     * @return bool A flag that tells us whether or not we want to recurse when looking for repos
+     */
+    protected function getRecurse()
+    {
+        return $this->recurse;
+    }
+
+    /**
+     * Set the recurse flag
+     *
+     * @param bool $recurse A flag that tells us whether or not we want to recurse when looking for repos
+     */
+    protected function setRecurse($recurse)
+    {
+        $this->recurse = $recurse;
+        
         return $this;
     }
 
