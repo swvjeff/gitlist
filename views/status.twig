@@ -7,31 +7,92 @@
 {% block content %}
     {% include 'breadcrumb.twig' with {breadcrumbs: [{dir: 'Status', path:''}]} %}
 
-        {% if files is not empty %}
+        {% if unstaged is not empty %}
+        <form method="post">
+        <h3>Unstaged files</h3>
         <table class="tree">
             <thead>
             <tr>
                 <th width="5%">status</th>
-                <th width="80%">filename</th>
+                <th width="60%">filename</th>
                 <th width="15%">modified</th>
-                
+                <th width="15%">action</th>
             </tr>
             </thead>
             
-            {% for file in files %}
+            {% for file in unstaged %}
             <tr>
                 <td>{{ file.status }}</td>
-                <!--<td>{{ file.filename }}</td>-->
                 <td><i class="{{ file.type == "folder" or file.type == "symlink" ? "icon-folder-open" : "icon-file" }} icon-spaced"></i> <a href="
                 {{ path('blob', {repo: repo, commitishPath: branch ~ '/' ~ file.filename}) }}
                 ">{{ file.filename }}</a></td>
                 </td>
                 <td>{{ file.modification }}</td>
+                <td>
+                    <select class="input-small" name="action[{{ file.hash }}]">
+                        <option>Nothing</option>
+                        <option>Stage</option>
+                    </select>
+                </td>
             </tr>
             {% endfor %}
+            <tr>
+                <td colspan="3"></td>
+                <td><input type="submit" name="do" value="Stage Files" class="btn btn-success" onclick="return confirm('Are you sure you want to save the changes?')"></td>
+            </tr>
             
         </table>
+        </form>
+        {% else %}
+        <!--<div>There are no unstaged files</div>-->
         {% endif %}
 
+
+
+        {% if staged is not empty %}
+            <form method="post">
+                <h3>Staged files ready for commit</h3>
+                <table class="tree">
+                    <thead>
+                    <tr>
+                        <th width="5%">status</th>
+                        <th width="60%">filename</th>
+                        <th width="15%">modified</th>
+                        <th width="15%">action</th>
+                    </tr>
+                    </thead>
+    
+                    {% for file in staged %}
+                        <tr>
+                            <td>{{ file.status }}</td>
+                            <td><i class="{{ file.type == "folder" or file.type == "symlink" ? "icon-folder-open" : "icon-file" }} icon-spaced"></i> <a href="
+                            {{ path('blob', {repo: repo, commitishPath: branch ~ '/' ~ file.filename}) }}
+                            ">{{ file.filename }}</a></td>
+                            </td>
+                            <td>{{ file.modification }}</td>
+                            <td>
+                                <select class="input-small" name="action[{{ file.hash }}]">
+                                    <option>Nothing</option>
+                                    <option>Unstage</option>
+                                </select>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="3"></td>
+                        <td><input type="submit" name="do" value="Unstage Files" class="btn btn-success" onclick="return confirm('Are you sure you want to save the changes?')"></td>
+                    </tr>
+    
+                </table>
+            </form>
+            {% else %}
+                <!--<div>There are no modified files</div>-->
+            {% endif %}
+    
+    
+    
+    
+    
+    
     <hr />
 {% endblock %}

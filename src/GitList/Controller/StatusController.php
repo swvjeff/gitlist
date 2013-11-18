@@ -19,7 +19,7 @@ class StatusController implements ControllerProviderInterface
             if ($branch === null) {
                 $branch = $repository->getHead();
             }
-
+            
             $files = $repository->getStatus($branch);
 
             return $app['twig']->render('status.twig', array(
@@ -27,12 +27,52 @@ class StatusController implements ControllerProviderInterface
                 'branch'         => $branch,
                 'branches'       => $repository->getBranches(),
                 'tags'           => $repository->getTags(),
-                'files'         => $files,
+                'unstaged'       => $files['unstaged'],
+                'staged'         => $files['staged'],
             ));
         })->assert('repo', $app['util.routing']->getRepositoryRegex())
             ->assert('branch', $app['util.routing']->getBranchRegex())
             ->value('branch', null)
             ->bind('status');
+
+        
+        $route->post('{repo}/status/{branch}', function (Request $request, $repo, $branch = '') use ($app) {
+            $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
+            
+            if ($branch === null) {
+                $branch = $repository->getHead();
+            }
+
+            $actions = $request->request->get('action');
+            $files = $repository->getStatus($branch);
+            
+            $files = array_merge($files['staged'], $files['unstaged']);
+
+            foreach($files as $file) {
+                $hash = sha1($file['filename']);
+                switch($actions[$hash]) {
+                    case 'Stage':
+                        $repository->stageFile($file['filename']);
+                        break;
+                    case 'Unstage':
+                        $repository->unstageFile($file['filename']);
+                        break;
+                }
+            }
+
+            $files = $repository->getStatus($branch);
+
+            return $app['twig']->render('status.twig', array(
+                'repo'             => $repo,
+                'branch'           => $branch,
+                'branches'         => $repository->getBranches(),
+                'tags'             => $repository->getTags(),
+                'unstaged'         => $files['unstaged'],
+                'staged'           => $files['staged'],
+            ));
+        })->assert('repo', $app['util.routing']->getRepositoryRegex())
+            ->assert('branch', $app['util.routing']->getBranchRegex())
+            ->value('branch', null);
         
         return $route;
     }

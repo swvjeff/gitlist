@@ -308,29 +308,50 @@ class Repository extends BaseRepository
      */
     public function getStatus($branch)
     {
-        $files = array();
-        $status = trim($this->getClient()->run($this, 'status --porcelain'));
-        foreach(explode("\n",$status) as $l)
+        /// Get the status, clean and convert to array
+        $statuses = explode("\n",$this->getClient()->run($this, 'status --porcelain'));
+        foreach($statuses as $s)
         {
-            if(empty($l))
+            if(empty($s))
             {
                 continue;
             }
             
-            preg_match(":^\s*([ACDMRTUX]+|\?\?)\s+(.+)$:", $l, $m);
+            preg_match(":^(.)(.) (.+)$:", $s, $m);
+            $filename = $m[3];
+            $full_path = $_SERVER['DOCUMENT_ROOT'] . '/' . $filename;
             
-            $status_letter = $m[1];
-            $file = $m[2];
+            $staged = !in_array($m[1], array(" ","?"));
+            $unstaged = $m[2] !== ' ';
             
-            $files[] = array(
-                'filename' => $file,
-                'status' => $status_letter,
-                'modification' => date("M j G:i:s",filemtime($_SERVER['DOCUMENT_ROOT'].'/'.$file)),
-                'type' => 'file',
-                'path' => '',
+            $file_info = array(
+                'filename' => $filename,
+                'status' => $m[2],
+                'modification' => date("M j G:i:s",filemtime($full_path)),
+                'hash' => sha1($filename),
+                'type' => filetype($full_path),
             );
+            
+            /// Add it to the appropriate array (it can be both "staged" and "unstaged")
+            if($staged) 
+            {
+                $files['staged'][] = $file_info;
+            }
+            if($unstaged)
+            {
+                $files['unstaged'][] = $file_info;
+            }
         }
+        
         return $files;
+    }
+    
+    public function stageFile($filename) {
+        return $this->getClient()->run($this, 'add ' . $filename);
+    }
+    
+    public function unstageFile($filename) {
+        return $this->getClient()->run($this, 'reset HEAD ' . $filename);
     }
 
     public function getAuthorStatistics($branch)
