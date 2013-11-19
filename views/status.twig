@@ -6,6 +6,11 @@
 
 {% block content %}
     {% include 'breadcrumb.twig' with {breadcrumbs: [{dir: 'Status', path:''}]} %}
+    
+    
+    {% if message is defined and message %}
+    <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
 
         {% if unstaged is not empty %}
         <form method="post">
@@ -23,9 +28,9 @@
             {% for file in unstaged %}
             <tr>
                 <td>{{ file.status }}</td>
-                <td><i class="{{ file.type == "folder" or file.type == "symlink" ? "icon-folder-open" : "icon-file" }} icon-spaced"></i> <a href="
-                {{ path('blob', {repo: repo, commitishPath: branch ~ '/' ~ file.filename}) }}
-                ">{{ file.filename }}</a></td>
+                <td>
+                    <i class="{{ file.type == "folder" or file.type == "symlink" ? "icon-folder-open" : "icon-file" }} icon-spaced"></i>
+                    <a target="_blank" href="{{ path('blob', {repo: repo, commitishPath: branch ~ '/' ~ file.filename}) }}">{{ file.filename }}</a>
                 </td>
                 <td>{{ file.modification }}</td>
                 <td>
@@ -65,9 +70,10 @@
                     {% for file in staged %}
                         <tr>
                             <td>{{ file.status }}</td>
-                            <td><i class="{{ file.type == "folder" or file.type == "symlink" ? "icon-folder-open" : "icon-file" }} icon-spaced"></i> <a href="
-                            {{ path('blob', {repo: repo, commitishPath: branch ~ '/' ~ file.filename}) }}
-                            ">{{ file.filename }}</a></td>
+                            <td>
+                                <i class="{{ file.type == "folder" or file.type == "symlink" ? "icon-folder-open" : "icon-file" }} icon-spaced"></i>
+                                <a target="_blank" href="{{ path('blob', {repo: repo, commitishPath: branch ~ '/' ~ file.filename}) }}">{{ file.filename }}</a>
+                            </td>
                             </td>
                             <td>{{ file.modification }}</td>
                             <td>
@@ -85,9 +91,17 @@
     
                 </table>
             </form>
-            {% else %}
-                <!--<div>There are no modified files</div>-->
-            {% endif %}
+
+            <h3>Commit staged files</h3>
+            <form method="post">
+                <textarea name="comments" style="width: 100%; height: 100px;"></textarea>
+                <div style="text-align: center;">
+                    <input type="submit" name="do" value="Commit Files" class="btn btn-success" />
+                </div>
+            </form>
+
+        {% else %}
+        {% endif %}
     
     
     

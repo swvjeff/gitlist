@@ -44,22 +44,45 @@ class StatusController implements ControllerProviderInterface
             }
 
             $actions = $request->request->get('action');
-            $files = $repository->getStatus($branch);
+            $do = $request->request->get('do');
+            $result = '';
             
-            $files = array_merge($files['staged'], $files['unstaged']);
-
-            foreach($files as $file) {
-                $hash = sha1($file['filename']);
-                switch($actions[$hash]) {
-                    case 'Stage':
-                        $repository->stageFile($file['filename']);
-                        break;
-                    case 'Unstage':
-                        $repository->unstageFile($file['filename']);
-                        break;
+            /// Stage / Unstage routine
+            if(in_array($do, array('Stage Files', 'Unstage Files'))) {
+                $files = $repository->getStatus($branch);
+                
+                $files = array_merge($files['staged'], $files['unstaged']);
+    
+                $staged = $unstaged = 0;
+                foreach($files as $file) {
+                    $hash = sha1($file['filename']);
+                    switch($actions[$hash]) {
+                        case 'Stage':
+                            $repository->stageFile($file['filename']);
+                            $staged++;
+                            break;
+                        case 'Unstage':
+                            $repository->unstageFile($file['filename']);
+                            $unstaged++;
+                            break;
+                    }
+                }
+                
+                if($staged > 0) {
+                    $result .= $staged.' file'.($staged > 1 ? 's' : '').' staged. ';
+                }
+                if($unstaged > 0) {
+                    $result .= $unstaged.' file'.($unstaged > 1 ? 's' : '').' unstaged. ';
                 }
             }
-
+            
+            if($do === 'Commit Files') {
+                $comments = $request->request->get('comments');
+                if(!empty($comments)) {
+                    $result = $repository->commit($branch, $comments);
+                }
+            }
+            
             $files = $repository->getStatus($branch);
 
             return $app['twig']->render('status.twig', array(
@@ -69,6 +92,7 @@ class StatusController implements ControllerProviderInterface
                 'tags'             => $repository->getTags(),
                 'unstaged'         => $files['unstaged'],
                 'staged'           => $files['staged'],
+                'message'          => $result,
             ));
         })->assert('repo', $app['util.routing']->getRepositoryRegex())
             ->assert('branch', $app['util.routing']->getBranchRegex())

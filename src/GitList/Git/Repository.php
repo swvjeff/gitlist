@@ -356,7 +356,11 @@ class Repository extends BaseRepository
     }
     
     public function unstageFile($filename) {
-        return $this->getClient()->run($this, 'reset HEAD ' . $filename);
+        return $this->getClient()->run($this, 'reset -q HEAD ' . $filename);
+    }
+    
+    public function commit($branch, $comments) {
+        return $this->getClient()->run($this, 'commit -m "'.$comments.'"');
     }
 
     public function getAuthorStatistics($branch)
