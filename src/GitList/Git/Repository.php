@@ -308,6 +308,11 @@ class Repository extends BaseRepository
      */
     public function getStatus($branch)
     {
+        $files = array(
+          'staged' => array(),
+          'unstaged' => array(),
+        );
+        
         /// Get the status, clean and convert to array
         $statuses = explode("\n",$this->getClient()->run($this, 'status --porcelain'));
         foreach($statuses as $s)
@@ -320,7 +325,6 @@ class Repository extends BaseRepository
             preg_match(":^(.)(.) (.+)$:", $s, $m);
             $filename = $m[3];
             $full_path = $this->getPath() . '/' . $filename;
-            
             
             $staged = !in_array($m[1], array(" ","?"));
             $unstaged = $m[2] !== ' ';
