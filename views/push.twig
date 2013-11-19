@@ -1,0 +1,18 @@
+{% extends 'layout_page.twig' %}
+
+{% set page = 'status' %}
+
+{% block title %}GitList{% endblock %}
+
+{% block content %}
+    {% include 'breadcrumb.twig' with {breadcrumbs: [{dir: 'Status', path:''}]} %}
+
+
+    {% if message is defined and message %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
+
+    {{ push_status }}
+
+    <hr />
+{% endblock %}
