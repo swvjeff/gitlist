@@ -74,7 +74,6 @@
                                 <i class="{{ file.type == "folder" or file.type == "symlink" ? "icon-folder-open" : "icon-file" }} icon-spaced"></i>
                                 <a target="_blank" href="{{ path('blob', {repo: repo, commitishPath: branch ~ '/' ~ file.filename}) }}">{{ file.filename }}</a>
                             </td>
-                            </td>
                             <td>{{ file.modification }}</td>
                             <td>
                                 <select class="input-small" name="action[{{ file.hash }}]" style="margin-bottom: 0">

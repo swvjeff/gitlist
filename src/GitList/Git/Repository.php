@@ -295,6 +295,54 @@ class Repository extends BaseRepository
         return $searchResults;
     }
     
+    public function getTrackedRemote()
+    {
+        return trim(preg_replace(":/.+:","",$this->getClient()->run($this, "rev-parse --abbrev-ref --symbolic-full-name @{u}")));
+    }
+    
+    public function getPushStatus($remote, $remote_branch)
+    {
+        /// git diff --stat {remote}/{branch} HEAD
+        /// git log {remote}/{branch}..HEAD
+        $commits = $return = array();
+        
+        $cherry = $this->getClient()->run($this, "cherry -v");
+        if(!empty($cherry))
+        {
+            foreach(explode("\n", $cherry) as $c)
+            {
+                if(preg_match(":^\+ (.{40}) (.+)$:", $c, $m))
+                {
+                    $hash = $m[1];
+                    $comment = $m[2];
+                    $commits[] = array(
+                        'hash' => $hash,
+                        'comment' => $comment
+                    );
+                }
+            }
+        }
+        
+        $diff = $this->getClient()->run($this, "diff --numstat {$remote}/{$remote_branch} HEAD");
+        
+        if(!empty($diff)) {
+            foreach(explode("\n", $diff) as $d)
+            {
+                preg_match_all(":^(\d+)\t(\d)+\t(.+)$:", $d, $m, PREG_SET_ORDER);
+                foreach($m as $match)
+                {
+                    $return[] = array(
+                        'filename' => $match[3],
+                        'adds' => $match[1],
+                        'subs' => $match[2],
+                    );
+                }
+            }
+        }
+        
+        return $return;
+    }
+    
     /*
         Possible status letters are:
         A: addition of a file
