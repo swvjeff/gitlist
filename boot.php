@@ -7,8 +7,9 @@ $app = new GitList\Application($config, __DIR__);
 $app->mount('', new GitList\Controller\MainController());
 $app->mount('', new GitList\Controller\BlobController());
 $app->mount('', new GitList\Controller\CommitController());
-$app->mount('', new GitList\Controller\TreeController());
 $app->mount('', new GitList\Controller\StatusController());
+$app->mount('', new GitList\Controller\PushController());
+$app->mount('', new GitList\Controller\TreeController());
 $app->mount('', new GitList\Controller\NetworkController());
 
 return $app;
