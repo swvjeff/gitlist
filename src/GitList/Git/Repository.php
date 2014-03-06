@@ -326,7 +326,7 @@ class Repository extends BaseRepository
         return $message;
     }
     
-    public function getUnpushedCommits($remote, $remoteBranch, $page = 0)
+    public function getUnpushedCommits($remote, $remoteBranch)
     {
         $commits = $return = array();
         
@@ -425,7 +425,30 @@ class Repository extends BaseRepository
     
     public function commit($branch, $comments)
     {
-        return $this->getClient()->run($this, 'commit -m "'.$comments.'"', array("HOME" => "/home/www-data"));
+        $env = array();
+        if(!$this->isHomeDirSet())
+        {
+            $env['HOME'] = $this->getHomeDir();
+            if(empty($env['HOME']))
+            {
+                return "Couldn't find HOME environment variable. Commit unsuccessful.";
+            }
+        }
+        return $this->getClient()->run($this, 'commit -m "'.$comments.'"', $env);
+    }
+    
+    public function getHomeDir()
+    {
+        $process = new Process("echo ~");
+        $process->run();
+        return trim($process->getOutput());
+    }
+    
+    public function isHomeDirSet()
+    {
+        $process = new Process("echo \$HOME");
+        $process->run();
+        return strlen(trim($process->getOutput())) > 0;
     }
 
     public function getAuthorStatistics($branch)
