@@ -7,6 +7,7 @@ use Gitter\Model\Commit\Commit;
 use Gitter\Model\Commit\Diff;
 use Gitter\PrettyFormat;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Yaml\Exception\RuntimeException;
 
 class Repository extends BaseRepository
 {
@@ -297,16 +298,37 @@ class Repository extends BaseRepository
     
     public function getTrackedRemote()
     {
-        return trim(preg_replace(":/.+:","",$this->getClient()->run($this, "rev-parse --abbrev-ref --symbolic-full-name @{u}")));
+        $info = array(
+            'remote' => '',
+            'branch' => '',
+        );
+        try
+        {
+            $remote = trim($this->getClient()->run($this, "rev-parse --abbrev-ref --symbolic-full-name @{u}"));
+            preg_match(":^([^/]+)/(.+)$:", $remote, $m);
+            $info['remote'] = $m[1];
+            $info['branch'] = $m[2];
+        }
+        catch(\RuntimeException $e) { }
+        return $info;
     }
     
-    public function getPushStatus($remote, $remote_branch)
+    public function push($remote, $remoteBranch)
     {
-        /// git diff --stat {remote}/{branch} HEAD
-        /// git log {remote}/{branch}..HEAD
+        return "TODO: Implement push feature through SSH";
+        //return $this->getClient()->run($this, "push {$remote} {$remoteBranch}");
+    }
+    
+    public function getUnpushedCommits($remote, $remoteBranch, $page = 0)
+    {
         $commits = $return = array();
         
-        $cherry = $this->getClient()->run($this, "cherry -v");
+        ini_set('xdebug.var_display_max_depth', 5);
+        ini_set('xdebug.var_display_max_children', 256);
+        ini_set('xdebug.var_display_max_data', 1024);
+        
+        /// Grab each COMMIT that hasn't yet been pushed to $remote/$remoteBranch 
+        $cherry = $this->getClient()->run($this, "cherry -v {$remote}/{$remoteBranch} HEAD");
         if(!empty($cherry))
         {
             foreach(explode("\n", $cherry) as $c)
@@ -314,33 +336,17 @@ class Repository extends BaseRepository
                 if(preg_match(":^\+ (.{40}) (.+)$:", $c, $m))
                 {
                     $hash = $m[1];
-                    $comment = $m[2];
-                    $commits[] = array(
-                        'hash' => $hash,
-                        'comment' => $comment
-                    );
+                    $commits[$hash] = $this->getCommit($hash);
                 }
             }
         }
-        
-        $diff = $this->getClient()->run($this, "diff --numstat {$remote}/{$remote_branch} HEAD");
-        
-        if(!empty($diff)) {
-            foreach(explode("\n", $diff) as $d)
-            {
-                preg_match_all(":^(\d+)\t(\d)+\t(.+)$:", $d, $m, PREG_SET_ORDER);
-                foreach($m as $match)
-                {
-                    $return[] = array(
-                        'filename' => $match[3],
-                        'adds' => $match[1],
-                        'subs' => $match[2],
-                    );
-                }
-            }
-        }
-        
-        return $return;
+
+        return $commits;
+    }
+    
+    public function checkoutBranch($branch)
+    {
+        return $this->getClient()->run($this, 'checkout '.$branch);
     }
     
     /*
@@ -354,7 +360,7 @@ class Repository extends BaseRepository
         U: file is unmerged (you must complete the merge before it can be committed)
         X: "unknown" change type (most probably a bug, please report it)
      */
-    public function getStatus($branch)
+    public function getStatus()
     {
         $files = array(
           'staged' => array(),
@@ -363,6 +369,7 @@ class Repository extends BaseRepository
         
         /// Get the status, clean and convert to array
         $statuses = explode("\n",$this->getClient()->run($this, 'status --porcelain'));
+        
         foreach($statuses as $s)
         {
             if(empty($s))
@@ -370,7 +377,7 @@ class Repository extends BaseRepository
                 continue;
             }
             
-            preg_match(":^(.)(.) (.+)$:", $s, $m);
+            preg_match(":^(.)(.) \"?([^\"]+)\"?$:", $s, $m);
             $filename = $m[3];
             $full_path = $this->getPath() . '/' . $filename;
             

@@ -4,7 +4,6 @@ namespace GitList\Controller;
 
 use Silex\Application;
 use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 class StatusController implements ControllerProviderInterface
@@ -13,15 +12,13 @@ class StatusController implements ControllerProviderInterface
     {
         $route = $app['controllers_factory'];
         
-        $route->get('{repo}/status/{branch}', function($repo, $branch) use ($app) {
+        $route->get('{repo}/status', function($repo) use ($app) {
+            
             $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
+            $branch = $repository->getHead();
             
-            if ($branch === null) {
-                $branch = $repository->getHead();
-            }
+            $files = $repository->getStatus();
             
-            $files = $repository->getStatus($branch);
-
             return $app['twig']->render('status.twig', array(
                 'repo'           => $repo,
                 'branch'         => $branch,
@@ -31,17 +28,13 @@ class StatusController implements ControllerProviderInterface
                 'staged'         => $files['staged'],
             ));
         })->assert('repo', $app['util.routing']->getRepositoryRegex())
-            ->assert('branch', $app['util.routing']->getBranchRegex())
-            ->value('branch', null)
             ->bind('status');
 
         
-        $route->post('{repo}/status/{branch}', function (Request $request, $repo, $branch = '') use ($app) {
+        $route->post('{repo}/status', function (Request $request, $repo) use ($app) {
             $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
             
-            if ($branch === null) {
-                $branch = $repository->getHead();
-            }
+            $branch = $repository->getHead();
 
             $actions = $request->request->get('action');
             $do = $request->request->get('do');
@@ -49,7 +42,7 @@ class StatusController implements ControllerProviderInterface
             
             /// Stage / Unstage routine
             if(in_array($do, array('Stage Files', 'Unstage Files'))) {
-                $files = $repository->getStatus($branch);
+                $files = $repository->getStatus();
                 
                 $files = array_merge($files['staged'], $files['unstaged']);
     
@@ -83,7 +76,7 @@ class StatusController implements ControllerProviderInterface
                 }
             }
             
-            $files = $repository->getStatus($branch);
+            $files = $repository->getStatus();
 
             return $app['twig']->render('status.twig', array(
                 'repo'             => $repo,
@@ -94,9 +87,7 @@ class StatusController implements ControllerProviderInterface
                 'staged'           => $files['staged'],
                 'message'          => $result,
             ));
-        })->assert('repo', $app['util.routing']->getRepositoryRegex())
-            ->assert('branch', $app['util.routing']->getBranchRegex())
-            ->value('branch', null);
+        })->assert('repo', $app['util.routing']->getRepositoryRegex());
         
         return $route;
     }

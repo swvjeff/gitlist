@@ -24,7 +24,7 @@
 <p>No results found.</p>
 {% endif %}
 
-{% if page != 'searchcommits' %}
+{% if pager is defined and pager and page != 'searchcommits' %}
 <ul class="pager">
     {% if pager.current != 0 %}
     <li class="previous">

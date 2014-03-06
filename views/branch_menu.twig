@@ -3,7 +3,7 @@
     <ul class="dropdown-menu">
     <li class="dropdown-header">Branches</li>
     {% for item in branches %}
-        <li><a href="{{ path('branch', {repo: repo, branch: item}) }}">{{ item }}</a></li>
+        <li><a href="{{ path('checkout', {repo: repo, branch: item}) }}" onclick="return confirm('Are you sure you want to switch branches? This will actually checkout the \'{{ item }}\' branch.');">{{ item }}</a></li>
     {% endfor %}
     {# removing tags for now
     {% if tags %}

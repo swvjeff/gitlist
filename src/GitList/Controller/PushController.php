@@ -13,60 +13,52 @@ class PushController implements ControllerProviderInterface
     {
         $route = $app['controllers_factory'];
         
-        $route->get('{repo}/push', function($repo) use ($app) {
-            
+        $route->match('{repo}/push', function(Request $request, $repo) use ($app) {
+
             $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
-    
-            if($remote === null) {
-                $remote = $repository->getTrackedRemote();
-            }
+            $currentBranch = $repository->getHead();
+            $tracked = $repository->getTrackedRemote();
+            $message = '';
             
-            if ($branch === null) {
-                $branch = $repository->getHead();
-            }
-            
-            if(empty($remote) || empty($branch))
+            if(empty($currentBranch))
             {
-                exit("Your current branch isn't tracking a remote.");
+                exit("Git repository not on a valid branch.");
             }
-    
-            $push_status = $repository->getPushStatus($remote, $branch);
-            return $app['twig']->render('push.twig', array(
-                'repo'           => $repo,
-                'branch'         => $branch,
-                'branches'       => $repository->getBranches(),
-                'tags'           => $repository->getTags(),
-                'push_status'    => $push_status,
-                'remote'         => $remote,
-                'branch'         => $branch,
-            ));
-        })->bind('push');
-    
-        /*
-        $route->post('{repo}/push/{branch}', function (Request $request, $repo, $branch = '') use ($app) {
-            $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
-    
-            if ($branch === null) {
-                $branch = $repository->getHead();
+
+            if(empty($tracked['remote']) || empty($tracked['branch']))
+            {
+                /// TODO: Think about showing a dropdown of available branches (or a textbox so user can enter new branch)
+                exit("Local branch isn't tracking a remote branch.");
             }
-    
-            $actions = $request->request->get('action');
+
             $do = $request->request->get('do');
-            $result = '';
-    
-            $push_status = $repository->getPushStatus($branch);
-    
+
+            if($do === 'Push')
+            {
+                $message = $repository->push($tracked['remote'], $tracked['branch']);
+            }
+
+            $commits = $repository->getUnpushedCommits($tracked['remote'], $tracked['branch']);
+            $categorized = array();
+            
+            foreach ($commits as $commit) {
+                $date = $commit->getDate();
+                $date = $date->format('m/d/Y');
+                $categorized[$date][] = $commit;
+            }
+            
             return $app['twig']->render('push.twig', array(
                 'repo'           => $repo,
-                'branch'         => $branch,
+                'branch'         => $currentBranch,
                 'branches'       => $repository->getBranches(),
                 'tags'           => $repository->getTags(),
-                'push_status'    => $push_status,
+                'commits'        => $categorized,
+                'remote'         => $tracked['remote'],
+                'remoteBranch'   => $tracked['branch'],
+                'message'        => $message,
             ));
-        })->assert('repo', $app['util.routing']->getRepositoryRegex())
-            ->assert('branch', $app['util.routing']->getBranchRegex())
-            ->value('branch', null);
-        */
+        })->method('GET|POST')->bind('push');
+    
         
         return $route;
         

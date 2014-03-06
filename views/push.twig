@@ -5,33 +5,19 @@
 {% block title %}GitList{% endblock %}
 
 {% block content %}
-    {% include 'breadcrumb.twig' with {breadcrumbs: [{dir: 'Status', path:''}]} %}
-
-    {% if push_status %}
-    <h3>Files to be pushed to {{ remote }}/{{ branch }}</h3>
-    <table class="tree">
-        <thead>
-        <tr>
-            <th style="width: 60%">filename</th>
-            <th style="width: 15%">additions</th>
-            <th style="width: 15%">subtractions</th>
-        </tr>
-        </thead>
-        {% for file in push_status %}
-        <tr>
-            <td>{{ file.filename }}</td>
-            <td>{{ file.adds }}</td>
-            <td>{{ file.subs }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p>No commits to push.</p>
-    {% endif %}
+    {% include 'breadcrumb.twig' with {breadcrumbs: [{dir: 'Push to remote', path:''}]} %}
 
     {% if message is defined and message %}
         <div class="alert alert-success">{{ message }}</div>
     {% endif %}
+
+    {% include 'commits_list.twig' %}
+    
+    <div class="row" style="text-align: center;">
+        <form method="post">
+            <button onclick="return confirm('Are you sure you want to push to {{ remote ~ '/' ~ remoteBranch }}?');" type="submit" name="do" value="Push" class="btn btn-success btn-large">Push to {{ remote }}/{{ remoteBranch }}</button>
+        </form>
+    </div>
 
     <hr />
 {% endblock %}
