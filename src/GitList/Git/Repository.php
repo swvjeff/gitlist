@@ -321,8 +321,8 @@ class Repository extends BaseRepository
             $message = $this->getClient()->run($this, "push {$remote} {$remoteBranch}");
         }
         catch(\RuntimeException $e) { 
-            $message = "There was an error pushing to {$remote}/{$remoteBranch}. Please make sure your web server has access to your git repository. Error: ".$e->getMessage();
-        } 
+            $message = "There was an error pushing to {$remote}/{$remoteBranch}. Please make sure your web server has access to your git repository. And that you have manually accepted the server's RSA key fingerprint. Error: ".$e->getMessage();
+        }
         return $message;
     }
     
@@ -375,7 +375,7 @@ class Repository extends BaseRepository
         );
         
         /// Get the status, clean and convert to array
-        $statuses = explode("\n",$this->getClient()->run($this, 'status --porcelain'));
+        $statuses = explode("\n",trim($this->getClient()->run($this, 'status --porcelain'), "\n\r"));
         
         foreach($statuses as $s)
         {

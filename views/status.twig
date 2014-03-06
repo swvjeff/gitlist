@@ -6,11 +6,12 @@
 
 {% block content %}
     {% include 'breadcrumb.twig' with {breadcrumbs: [{dir: 'Status', path:''}]} %}
-    
-    
+
     {% if message is defined and message %}
-    <div class="alert alert-success">{{ message }}</div>
+        <div class="alert alert-success">{{ message }}</div>
     {% endif %}
+    
+    {% if unstaged is not empty or staged is not empty %}
 
         {% if unstaged is not empty %}
         <form method="post">
@@ -48,8 +49,6 @@
             
         </table>
         </form>
-        {% else %}
-        <!--<div>There are no unstaged files</div>-->
         {% endif %}
 
 
@@ -99,13 +98,11 @@
                 </div>
             </form>
 
-        {% else %}
         {% endif %}
-    
-    
-    
-    
-    
+
+    {% elseif message is not defined or not message %}
+        <div class="alert alert-danger">No files ready to stage or commit.</div>
+    {% endif %}
     
     <hr />
 {% endblock %}
