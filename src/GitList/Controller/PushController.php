@@ -31,9 +31,7 @@ class PushController implements ControllerProviderInterface
                 exit("Local branch isn't tracking a remote branch.");
             }
 
-            $do = $request->request->get('do');
-
-            if($do === 'Push')
+            if($request->request->get('do') === 'Push')
             {
                 $message = $repository->push($tracked['remote'], $tracked['branch']);
             }

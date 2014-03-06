@@ -8,6 +8,8 @@ use Gitter\Model\Commit\Diff;
 use Gitter\PrettyFormat;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Exception\RuntimeException;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ExecutableFinder;
 
 class Repository extends BaseRepository
 {
@@ -315,8 +317,13 @@ class Repository extends BaseRepository
     
     public function push($remote, $remoteBranch)
     {
-        return "TODO: Implement push feature through SSH";
-        //return $this->getClient()->run($this, "push {$remote} {$remoteBranch}");
+        try {
+            $message = $this->getClient()->run($this, "push {$remote} {$remoteBranch}");
+        }
+        catch(\RuntimeException $e) { 
+            $message = "There was an error pushing to {$remote}/{$remoteBranch}. Please make sure your web server has access to your git repository. Error: ".$e->getMessage();
+        } 
+        return $message;
     }
     
     public function getUnpushedCommits($remote, $remoteBranch, $page = 0)
@@ -406,16 +413,19 @@ class Repository extends BaseRepository
         return $files;
     }
     
-    public function stageFile($filename) {
+    public function stageFile($filename)
+    {
         return $this->getClient()->run($this, 'add ' . $filename);
     }
     
-    public function unstageFile($filename) {
+    public function unstageFile($filename)
+    {
         return $this->getClient()->run($this, 'reset -q HEAD ' . $filename);
     }
     
-    public function commit($branch, $comments) {
-        return $this->getClient()->run($this, 'commit -m "'.$comments.'"');
+    public function commit($branch, $comments)
+    {
+        return $this->getClient()->run($this, 'commit -m "'.$comments.'"', array("HOME" => "/home/www-data"));
     }
 
     public function getAuthorStatistics($branch)
