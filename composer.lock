@@ -7,16 +7,16 @@
     "packages": [
         {
             "name": "klaussilveira/gitter",
-            "version": "0.2.1",
+            "version": "0.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swvjeff/gitter.git",
-                "reference": "f1bf7559f161e17bf80767087ba31260c04675d8"
+                "reference": "95578b5ec14561caab204ef8bc49fb2689406426"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swvjeff/gitter/zipball/f1bf7559f161e17bf80767087ba31260c04675d8",
-                "reference": "f1bf7559f161e17bf80767087ba31260c04675d8",
+                "url": "https://api.github.com/repos/swvjeff/gitter/zipball/95578b5ec14561caab204ef8bc49fb2689406426",
+                "reference": "95578b5ec14561caab204ef8bc49fb2689406426",
                 "shasum": ""
             },
             "require": {
@@ -51,9 +51,9 @@
                 "vcs"
             ],
             "support": {
-                "source": "https://github.com/swvjeff/gitter/tree/master"
+                "source": "https://github.com/swvjeff/gitter/tree/0.2.2"
             },
-            "time": "2014-03-06 21:13:03"
+            "time": "2014-03-06 22:51:59"
         },
         {
             "name": "pimple/pimple",

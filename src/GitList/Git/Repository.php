@@ -387,6 +387,13 @@ class Repository extends BaseRepository
             preg_match(":^(.)(.) \"?([^\"]+)\"?$:", $s, $m);
             $filename = $m[3];
             $full_path = $this->getPath() . '/' . $filename;
+
+            if(empty($filename) || !file_exists($full_path))
+            {
+                continue;
+            }
+
+            $full_path = $this->getPath() . '/' . $filename;
             
             $staged = !in_array($m[1], array(" ","?"));
             $unstaged = $m[2] !== ' ';
