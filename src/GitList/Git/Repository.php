@@ -432,16 +432,17 @@ class Repository extends BaseRepository
     
     public function commit($branch, $comments)
     {
-        $env = array();
+        /// $HOME environment var needs to be set. Let's try and figure it out if it's not
         if(!$this->isHomeDirSet())
         {
-            $env['HOME'] = $this->getHomeDir();
-            if(empty($env['HOME']))
+            $home = $this->getHomeDir();
+            if(empty($home))
             {
                 return "Couldn't find HOME environment variable. Commit unsuccessful.";
             }
+            putenv('HOME='.$home);
         }
-        return $this->getClient()->run($this, 'commit -m "'.$comments.'"', $env);
+        return $this->getClient()->run($this, 'commit -m "'.$comments.'"');
     }
     
     public function getHomeDir()
