@@ -11,7 +11,7 @@ class StatusController implements ControllerProviderInterface
     public function connect(Application $app)
     {
         $route = $app['controllers_factory'];
-        
+
         $route->get('{repo}/status', function($repo) use ($app) {
             
             $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
@@ -39,7 +39,26 @@ class StatusController implements ControllerProviderInterface
             $actions = $request->request->get('action');
             $do = $request->request->get('do');
             $result = '';
-            
+
+            $username = '';
+            $token = $app['security']->getToken();
+            if ($token !== null) {
+                $user = $token->getUser();
+                $username = $user->getUsername();
+            }
+
+            $gitName = '';
+            $gitEmail = '';
+            if(!empty($username))
+            {
+                $gitInfo = $app['config']['users'][$username]['git'];
+                if(is_array($gitInfo) && array_key_exists('name', $gitInfo) && !empty($gitInfo['name']) && !array_key_exists('email', $gitInfo) && !empty($gitInfo['email']))
+                {
+                    $gitName = $gitInfo['name'];
+                    $gitEmail = $gitInfo['email'];
+                }
+            }
+
             /// Stage / Unstage routine
             if(in_array($do, array('Stage Files', 'Unstage Files'))) {
                 $files = $repository->getStatus();
@@ -51,7 +70,7 @@ class StatusController implements ControllerProviderInterface
                     $hash = sha1($file['filename']);
                     switch($actions[$hash]) {
                         case 'Stage':
-                            $repository->stageFile($file['filename']);
+                            $result .= $repository->stageFile($file['filename']);
                             $staged++;
                             break;
                         case 'Unstage':
@@ -69,10 +88,10 @@ class StatusController implements ControllerProviderInterface
                 }
             }
             
-            if($do === 'Commit Files') {
+            if(empty($message) && $do === 'Commit Files') {
                 $comments = $request->request->get('comments');
                 if(!empty($comments)) {
-                    $result = $repository->commit($branch, $comments);
+                    $result = $repository->commit($branch, $comments, $gitName, $gitEmail);
                 }
             }
             

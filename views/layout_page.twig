@@ -3,6 +3,7 @@
 {% block body %}
     {% include 'navigation.twig' %}
 
+    {% if repo is defined %}
     <div class="container">
         <div class="row">
             <div class="span12">
@@ -23,6 +24,7 @@
                 {% include 'menu.twig' %}
             </div>
         </div>
+        {% endif %}
 
         {% block content %}{% endblock %}
 

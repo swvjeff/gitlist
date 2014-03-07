@@ -422,18 +422,24 @@ class Repository extends BaseRepository
     
     public function stageFile($filename)
     {
-        return $this->getClient()->run($this, 'add ' . $filename);
+        return $this->getClient()->run($this, 'add -v ' . $filename);
     }
     
     public function unstageFile($filename)
     {
-        return $this->getClient()->run($this, 'reset -q HEAD ' . $filename);
+        return $this->getClient()->run($this, 'reset HEAD -q ' . $filename);
     }
     
-    public function commit($branch, $comments)
+    public function commit($branch, $comments, $name = '', $email = '')
     {
-        /// $HOME environment var needs to be set. Let's try and figure it out if it's not
-        if(!$this->isHomeDirSet())
+        $author = '';
+        /// Custom author (via users.yml)?
+        if(!empty($name) && !empty($email))
+        {
+            $author = ' --author="'.$name.' <'.$email.'>"';
+        }
+        /// Otherwise, $HOME environment var needs to be set. Let's try and figure it out if it's not
+        elseif(!$this->isHomeDirSet())
         {
             $home = $this->getHomeDir();
             if(empty($home))
@@ -442,7 +448,7 @@ class Repository extends BaseRepository
             }
             putenv('HOME='.$home);
         }
-        return $this->getClient()->run($this, 'commit -m "'.$comments.'"');
+        return $this->getClient()->run($this, 'commit -m "'.$comments.'"'.$author);
     }
     
     public function getHomeDir()

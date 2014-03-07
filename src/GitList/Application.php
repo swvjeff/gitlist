@@ -3,12 +3,16 @@
 namespace GitList;
 
 use Silex\Application as SilexApplication;
+use Silex\Provider\SessionServiceProvider;
+use Silex\Provider\SecurityServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\UrlGeneratorServiceProvider;
+use Silex\Provider\AuthenticationServiceProvider;
 use GitList\Provider\GitServiceProvider;
 use GitList\Provider\RepositoryUtilServiceProvider;
 use GitList\Provider\ViewUtilServiceProvider;
 use GitList\Provider\RoutingUtilServiceProvider;
+use DerAlex\Silex\YamlConfigServiceProvider;
 
 /**
  * GitList application.
@@ -58,6 +62,7 @@ class Application extends SilexApplication
         $this->register(new RepositoryUtilServiceProvider());
         $this->register(new UrlGeneratorServiceProvider());
         $this->register(new RoutingUtilServiceProvider());
+        $this->register(new SessionServiceProvider());
 
         $this['twig'] = $this->share($this->extend('twig', function ($twig, $app) {
             $twig->addFilter('htmlentities', new \Twig_Filter_Function('htmlentities'));
@@ -65,6 +70,39 @@ class Application extends SilexApplication
 
             return $twig;
         }));
+
+        /// Uncomment once to create a new encrypted password and var_dump it to the page
+        /// $encoder = new \Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder();
+        /// var_dump($encoder->encodePassword('password', ''));
+
+        /// Password protection. Grab user config from users.yml
+        $this->register(new YamlConfigServiceProvider(__DIR__ . '/../../users.yml'));
+        $users = array();
+        foreach($this['config']['users'] as $username => $info)
+        {
+            if(array_key_exists('credentials', $info))
+            {
+                $users[$username] = $info['credentials'];
+            }
+        }
+        
+        $this['security.firewalls'] = array();
+        $this->register(new SecurityServiceProvider(), array(
+            'security.firewalls' => array(
+                'login' => array(
+                    'pattern' => '^/login$'
+                ),
+                'secured' => array(
+                    'pattern' => '^.*$',
+                    'form' => array(),
+                    'logout' => array(
+                        'path' => 'logout',
+                    ),
+                    'users' => $users
+                )
+            )
+        ));
+        $this->boot();
 
         // Handle errors
         $this->error(function (\Exception $e, $code) use ($app) {
@@ -97,5 +135,15 @@ class Application extends SilexApplication
     public function getViewPath()
     {
         return $this->path . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR;
+    }
+    
+    public function getUser()
+    {
+        $token = $this['security']->getToken();
+        if($token !== null)
+        {
+            return $token->getUser();
+        }    
+        return false;
     }
 }

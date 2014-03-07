@@ -1,0 +1,52 @@
+{% extends 'layout_page.twig' %}
+
+{% set page = 'login' %}
+
+{% block title %}GitList{% endblock %}
+
+{% block content %}
+
+    {% if message is defined and message %}
+        <div class="alert alert-success">{{ message | nl2br }}</div>
+    {% endif %}
+
+    <div class="container">
+        <div class="row">
+            <div class="span12">
+                <form class="form-horizontal" action="{{ path('login_check') }}" method="post">
+                    <fieldset>
+                        <div id="legend">
+                            <legend class="">Login</legend>
+                        </div>
+                        {% if error is defined and error %}
+                            <div class="alert alert-error">{{ error }}</div>
+                        {% endif %}
+                        <div class="control-group">
+                            <!-- Username -->
+                            <label class="control-label"  for="username">Username</label>
+                            <div class="controls">
+                                <input type="text" id="username" name="_username" value="{{ last_username }}" placeholder="Username" class="input-xlarge">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <!-- Password-->
+                            <label class="control-label" for="password">Password</label>
+                            <div class="controls">
+                                <input type="password" id="password" name="_password" placeholder="Password" class="input-xlarge">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <!-- Button -->
+                            <div class="controls">
+                                <button class="btn btn-success">Login</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <hr />
+{% endblock %}
