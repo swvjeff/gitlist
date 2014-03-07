@@ -1,5 +1,11 @@
 {
     "name": "swvjeff/gitlist",
+    "repositories": [
+        {
+            "url": "https://github.com/swvjeff/gitter.git",
+            "type": "vcs"
+        }
+    ],
     "require": {
         "silex/silex": "1.*",
         "twig/twig": "1.*",

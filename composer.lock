@@ -3,20 +3,20 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "9486172ec9da96efe289906d2a8c52af",
+    "hash": "37fef834e16baaaeb1492feb9b68813b",
     "packages": [
         {
             "name": "klaussilveira/gitter",
-            "version": "0.2.0",
+            "version": "0.2.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/klaussilveira/gitter.git",
-                "reference": "910a3d324caf53d8d21b55fb80a9a6735974a80c"
+                "url": "https://github.com/swvjeff/gitter.git",
+                "reference": "95578b5ec14561caab204ef8bc49fb2689406426"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/klaussilveira/gitter/zipball/910a3d324caf53d8d21b55fb80a9a6735974a80c",
-                "reference": "910a3d324caf53d8d21b55fb80a9a6735974a80c",
+                "url": "https://api.github.com/repos/swvjeff/gitter/zipball/95578b5ec14561caab204ef8bc49fb2689406426",
+                "reference": "95578b5ec14561caab204ef8bc49fb2689406426",
                 "shasum": ""
             },
             "require": {
@@ -33,7 +33,6 @@
                     "Gitter": "lib/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-2-Clause"
             ],
@@ -51,7 +50,10 @@
                 "git",
                 "vcs"
             ],
-            "time": "2013-06-01 13:32:37"
+            "support": {
+                "source": "https://github.com/swvjeff/gitter/tree/0.2.2"
+            },
+            "time": "2014-03-06 22:51:59"
         },
         {
             "name": "pimple/pimple",
