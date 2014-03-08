@@ -5,6 +5,9 @@
  * https://github.com/klaussilveira/gitlist
  */
 
+/// Ugly hack to circumvent the redis session handler
+ini_set('session.save_path', '/var/lib/php/session');
+
 // Set the default timezone for systems without date.timezone set in php.ini
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
