@@ -52,7 +52,7 @@ class StatusController implements ControllerProviderInterface
             if(!empty($username))
             {
                 $gitInfo = $app['config']['users'][$username]['git'];
-                if(is_array($gitInfo) && array_key_exists('name', $gitInfo) && !empty($gitInfo['name']) && !array_key_exists('email', $gitInfo) && !empty($gitInfo['email']))
+                if(is_array($gitInfo) && array_key_exists('name', $gitInfo) && !empty($gitInfo['name']) && array_key_exists('email', $gitInfo) && !empty($gitInfo['email']))
                 {
                     $gitName = $gitInfo['name'];
                     $gitEmail = $gitInfo['email'];
