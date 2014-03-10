@@ -1,0 +1,20 @@
+.tablefilter-filter-container H3 {
+    margin-top: -8px;
+}
+.tablefilter-filter-icon {
+    cursor: pointer;
+}
+.tablefilter-search-wrapper {
+    display: none;
+}
+.tablefilter tfoot {
+    border-top: 1px solid #EEE;
+}
+.tablefilter tfoot td {
+    padding: 8px;
+    line-height: 18px;
+    text-align: left;
+    vertical-align: top;
+    border-width: 1px 0;
+    background-color: #f8f8f8;
+}
